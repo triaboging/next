@@ -7,13 +7,14 @@ import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+// import InboxIcon from '@mui/icons-material/MoveToInbox';
+// import MailIcon from '@mui/icons-material/Mail';
 import { Anchor, INavDraver } from '../../types/types';
+import Link from 'next/link';
 
 
 
- const NavDrawer:React.FC<INavDraverver>=({state, toggleDrawer, pages})=> {
+ const NavDrawer:React.FC<INavDraver>=({state, toggleDrawer, pages})=> {
 //   const [state, setState] = React.useState({
 //     top: false,
 //     left: true,
@@ -43,17 +44,20 @@ import { Anchor, INavDraver } from '../../types/types';
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem button key={text}>
-            <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-            </ListItemIcon>
-            <ListItemText primary={text} />
-          </ListItem>
+        {pages.map((text, index) => (
+          <Link href = {text.link}>
+            <ListItem button key={index}>
+              <ListItemIcon>
+                {/* {index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
+                {text.icon}
+              </ListItemIcon>
+              <ListItemText primary={text.name} />
+            </ListItem>
+          </Link>
         ))}
       </List>
       <Divider />
-      <List>
+      {/* <List>
         {['All mail', 'Trash', 'Spam'].map((text, index) => (
           <ListItem button key={text}>
             <ListItemIcon>
@@ -62,7 +66,7 @@ import { Anchor, INavDraver } from '../../types/types';
             <ListItemText primary={text} />
           </ListItem>
         ))}
-      </List>
+      </List> */}
     </Box>
   );
 

@@ -4,12 +4,11 @@ import React from 'react';
 import axios from 'axios'
 import Link from 'next/link';
 
-interface AboutPageProps  {
+interface IAuth  {
 authProps?:any
 }
 
- const AboutPage:React.FC<AboutPageProps> = ({authProps}) => {
-    
+ const Auth:React.FC<IAuth> = ({authProps}) => {
     async function handlesubmit(){
         try{
             let user={
@@ -25,19 +24,16 @@ authProps?:any
         }catch(e){console.log(e)}
         
     }
-    
     return (
     <Container maxWidth="md"  
     sx={{
         // display: 'flex',
         // flexDirection: 'column',
         flex: "1 1 auto",}}>
-        <h1>AboutPage</h1>
-        <div>List</div>
-        <a href="http://localhost:5000/auth/google">href="http://auth/google"</a>
-        <p onClick={()=> handlesubmit()}>Тыц</p>
-        <a href="http://localhost:5000/some">/some</a>
+        <h1>Auth</h1>
+    
         {authProps && JSON.stringify(authProps)}
+        {authProps}
     </Container>
     
 )};
@@ -63,4 +59,4 @@ export async function getStaticProps() {
       },
     }
   }
-export default AboutPage;
+export default Auth;

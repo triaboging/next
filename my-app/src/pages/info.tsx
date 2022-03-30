@@ -3,6 +3,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
+
 interface InfoPageProps  {
 
 }
@@ -16,6 +17,7 @@ interface InfoPageProps  {
         flex: "1 1 auto",}}>
     <Typography variant='h3' component='h3' mt={10} align ="center" gutterBottom>
         Данные</Typography>
+        
     <Box
       component="form"
       sx={{

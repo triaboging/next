@@ -5,6 +5,7 @@ interface IpageType{
   icon: React.ReactNode
 }
 export interface IpageProps{
+  map(arg0: (text: any, index: any) => JSX.Element): import("react").ReactNode;
   page: IpageType[] 
 }
 export type Anchor = 'top' | 'left' | 'bottom' | 'right';

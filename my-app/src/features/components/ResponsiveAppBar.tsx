@@ -49,6 +49,11 @@ const ResponsiveAppBar = () => {
                 name: "About",
                 icon: <BookIcon  />
             },
+            {
+              link: "/info",
+              name: "Info",
+              icon: <BookIcon  />
+            },
             {    link: "/confirmation",
                 name: "Register",
                 // onClick: props.openRegisterDialog,
