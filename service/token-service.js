@@ -3,10 +3,10 @@ const { Tokens } = require('../models/models');
 
 
 class TokenService {
-    generateTokens(id, email, role, isActivated) {
+    generateTokens( email, role, isActivated) {
         try {
-        const accessToken = jwt.sign({id, email, role, isActivated}, process.env.JWT_ACCESS_SECRET, {expiresIn: '15s'})
-        const refreshToken = jwt.sign({id, email, role, isActivated}, process.env.JWT_REFRESH_SECRET, {expiresIn: '30d'})
+        const accessToken = jwt.sign({ email, role, isActivated}, process.env.JWT_ACCESS_SECRET, {expiresIn: '15s'})
+        const refreshToken = jwt.sign({ email, role, isActivated}, process.env.JWT_REFRESH_SECRET, {expiresIn: '30d'})
         return {
             accessToken,
             refreshToken

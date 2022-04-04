@@ -36,11 +36,11 @@ class userController{
         console.log('USER', user)
         // const token = generateJwt(user.id, user.email, user.role)
         await mailService.sendActivationMail(email, `${process.env.API_URL}/lapi/user/activate/${activationLink}` )
-        const tokens = tokenService.generateTokens(user.id, user.email, user.role, user.isActivated);
+        const tokens = tokenService.generateTokens( user.email, user.role, user.isActivated);
         await tokenService.saveToken(user.id, tokens.refreshToken);
         res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
         return res.json({ messege: 'пользователь зарегестрирован, на почту отправлено письмо с подтверждением',
-        token: {...tokens}
+        token: tokens.accessToken
     })
     }
     async login(req, res, next){
@@ -62,11 +62,11 @@ class userController{
         // await mailService.sendActivationMail(email, `${process.env.API_URL}/lapi/user/activate/${user.activationLink}` )
 
         // const token = generateJwt(user.id, user.email, user.role, user.isActivated)
-        const tokens = tokenService.generateTokens(user.id, user.email, user.role, user.isActivated);
+        const tokens = tokenService.generateTokens( user.email, user.role, user.isActivated);
         await tokenService.saveToken(user.id, tokens.refreshToken);
         res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
         return res.json({ messege: 'Аутентификация прошла успешно',
-        token: {...tokens}
+        token: tokens.accessToken
         })
 
     }
@@ -115,29 +115,88 @@ class userController{
     async refresh(req, res, next) {
         try {
             const {refreshToken} = req.cookies;
+            //////////////////
+            const googleSession = req.user
+            console.log('googleSession',googleSession )
+            if(googleSession){
+                console.log('блок сессии')
+                const googledata = {
+                           email: googleSession.email,
+                           login: googleSession.displayName,
+                           isActivated: true
+                        }
+                const user = await User.findOne({where:{email: googledata.email}});
+                if(!user){
+                    console.log('ГУГЛДАТАЕслиНеЮзер', googledata)
+                    const tokens = tokenService.generateTokens( googledata.email, googledata.role = 'USER', googledata.isActivated);
+                    const fakepassword = uuid.v4();
+                    const hashPassword = await bcrypt.hash(fakepassword, 5)
+                    const fakeLink =  uuid.v4();
+                    const user = await User.create
+                    ({login:googledata.login,
+                     email: googledata.email,
+                     password: hashPassword,
+                     activationLink: fakeLink,
+                    isActivated: googledata.isActivated})
+                    await tokenService.saveToken(user.id, tokens.refreshToken);
+                    const userData={
+                        id : user.id,
+                        email: user.email,
+                        login: user.login,
+                        isActivated: user.isActivated,
+                        
+                    }
+                    res.clearCookie("connect.sid", {path: '/'})
+                    req.session.destroy();
+                    res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
+                    return res.json({message: 'refresh token updated', userData,
+                     token : tokens.accessToken });
+                }else{
+                    console.log('ГУГЛДАТАЕслиЮзер', googledata)
+                    const tokens = tokenService.generateTokens( user.email, user.role, user.isActivated);
+                    await tokenService.saveToken(user.id, tokens.refreshToken);
+                    const userData={
+                        id : user.id,
+                        email: user.email,
+                        login: user.login,
+                        isActivated: user.isActivated,
+                        role: user.role
+                    }
+                    res.clearCookie("connect.sid", {path: '/'})
+                    req.session.destroy();
+                    res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
+                    return res.json({message: 'refresh token updated', userData,  token : tokens.accessToken });
+
+                }
+            }
+
+
+            ////////////............,,,,,,........................
             // const userData = await userService.refresh(refreshToken);
             if (!refreshToken) {
-                throw ApiError.UnauthorizedError();
+                throw ApiError.UnauthorizedError('Ошибка авторизации...!!!!!!!!');
             }
             const tokenData = tokenService.validateRefreshToken(refreshToken);
             const tokenFromDb = await tokenService.findToken(refreshToken);
             if (!tokenData || !tokenFromDb) {
-                throw ApiError.UnauthorizedError();
+                throw ApiError.UnauthorizedError('Тут тухляк уже');
             }
-            const user = await User.findOne({where:{id: tokenData.id}});
+            
+            const userRefresh = await User.findOne({where:{email: tokenData.email}});
             // const userDto = new UserDto(user);
-            const tokens = tokenService.generateTokens(user.id, user.email, user.isActivated, user.role);
+            console.log('Лабрадор2', userRefresh.email, userRefresh.id)
+            const tokens = tokenService.generateTokens( userRefresh.email, userRefresh.role, userRefresh.isActivated );
     
-            await tokenService.saveToken(user.id, tokens.refreshToken);
+            await tokenService.saveToken(userRefresh.id, tokens.refreshToken);
             const userData={
-                id : user.id,
-                email: user.email,
-                login: user.login,
-                isActivated: user.isActivated,
-                role: user.role
+                id : userRefresh.id,
+                email: userRefresh.email,
+                login: userRefresh.login,
+                isActivated: userRefresh.isActivated,
+                role: userRefresh.role
             }
-               res.cookie('refreshToken', tokenData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
-            return res.json({message: 'refresh token updated', userData, ...tokens });
+            res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
+            return res.json({message: 'refresh token updated', userData,  token : tokens.accessToken });
         } catch (e) {
             console.log(e)
             next(e);
@@ -146,7 +205,7 @@ class userController{
     async logout(req, res, next) {
         try {
             const {refreshToken} = req.cookies;
-            const token = await tokenService.removeToken(refreshToken);
+            await tokenService.removeToken(refreshToken);
             
             res.clearCookie('refreshToken');
             return res.json({ message: 'Вы вышли из аккаунта'});

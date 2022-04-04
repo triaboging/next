@@ -18,15 +18,14 @@ authProps?: any
     try{
       let arr = ['null', 'undefined', null, undefined]
       
-      // localStorage.setItem( "token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0cmlhYm9naW5AZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpc0FjdGl2YXRlZCI6dHJ1ZSwiaWF0IjoxNjQ4MzU4OTI4LCJleHAiOjE2NDg0NDUzMjh9.lM0ezaTgmtOC0llK8XU-m7Bso_VFyMxWBFCZ0OfriAA")
-      // localStorage.setItem("token",'undefined')
+      
        let getToken = localStorage.getItem('token')
-      //  let tokenExist = String(getToken)
+   
        console.log('tokenExist:', getToken)
        if(arr.includes(getToken) === false){
           
             console.log("мы ТУТ!!!!")
-            const res = await axios.get('http://localhost:5000/lapi/user/check',
+            const res = await axios.get('http://localhost:5000/lapi/user/refresh',
             {headers:{Authorization:`Bearer ${localStorage.getItem('token')}`},
             // credentials: "include",
             withCredentials: true
@@ -41,7 +40,7 @@ authProps?: any
             return res.data
         }else{
         console.log('Запрос без хедера')
-        const res = await axios.get('http://localhost:5000/lapi/user/check',
+        const res = await axios.get('http://localhost:5000/lapi/user/refresh',
         // {credentials: "include" })
         {withCredentials: true})
         // const data = await res.json()
@@ -51,25 +50,6 @@ authProps?: any
         }
         return res.data
       }
-
-      //  if
-      //  console.log('#1',getToken)
-      //  console.log('#2',typeof(getToken))
-      
-      //  localStorage.setItem('token', data.token)
-      
-      // localStorage.setItem("token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0cmlhYm9naW5AZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpc0FjdGl2YXRlZCI6dHJ1ZSwiaWF0IjoxNjQ4MzA2NTA5LCJleHAiOjE2NDgzOTI5MDl9.KjKECTpelz-MAkTeX2u2utVFK6-pytWYmXEFvq3mJ9U");
-      // const res = await axios('http://localhost:5000/lapi/user/check',
-      // {headers:{Authorization:`Bearer ${localStorage.getItem('token')}`},
-      // withCredentials: true
-      //  }
-      //   )
-       
-      
-      // localStorage.setItem('token', res.data.token)
-     
-      // setfirst(data)
-      
     }catch(e){console.log(e)}
   
   }
@@ -87,10 +67,7 @@ authProps?: any
 >
     <ResponsiveAppBar/>
 
-    {/* {authProps && JSON.stringify(authProps)}
-    {authProps}
-    // 
-    <h1>kegegegegegegegegegf</h1> */}
+    <h1>kegegegegegegegegegf</h1>
     {children}
    
     <StickyFooter/>

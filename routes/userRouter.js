@@ -21,16 +21,16 @@ router.get('/activate/:link',   userController.activate)
 router.get('/refresh', userController.refresh)
 router.get('/logout', userController.logout)
 router.get('/getusers',userController.getUsers)
-router.get('/check', authMiddleware,(req, res, next)=>{
-    try {
-        console.log('слива', req.session.email)
-        const token = generateJwt(req.auth.id, req.auth.email, req.auth.role, isActivated = true)
+// router.get('/check', authMiddleware,(req, res, next)=>{
+//     try {
+//         console.log('слива', req.session.email)
+//         const token = generateJwt(req.auth.id, req.auth.email, req.auth.role, isActivated = true)
         
-        return res.json({token: token, messeage: 'receive new tooken'})
-    } catch (error) {
-        console.log(error)
-    }
+//         return res.json({token: token, messeage: 'receive new tooken'})
+//     } catch (error) {
+//         console.log(error)
+//     }
     
-})
+// })
 
 module.exports = router;

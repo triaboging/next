@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 const sequelize = require('./db')
+const sequelizeSession = require('./sessionDb')
 const cors = require('cors')
 const corsMiddleware = require('./MiddleWare/cors')
 const fileUpload = require('express-fileupload')
@@ -10,6 +11,11 @@ const cookieParser = require('cookie-parser');
 const models = require('./models/models')
 const router = require('./routes/index')
 const session = require('express-session')
+let SequelizeStore = require("connect-session-sequelize")(session.Store);
+
+
+
+
 const passport = require('passport')
 const errorHandler = require('./MiddleWare/errorMiddleware')
 require('./passport')
@@ -24,7 +30,27 @@ const bodyParser = require('body-parser')
 const tokenService = require('./service/token-service')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cookieParser('you secret key'))
+//app.set('trust proxy', 1)
+
+app.use(cookieParser())
+
+
+let myStore = new SequelizeStore({
+  db: sequelizeSession,
+});
+app.use(session(
+  { 
+   store: new SequelizeStore({
+     db: sequelizeSession
+  }),
+  secret: 'cats',
+   resave: false, 
+   saveUninitialized: false,
+  // cookie:{secure: false, httpOnly: true, maxAge: 1000 * 60 * 30}
+  }));
+myStore.sync();
+app.use(passport.initialize());
+app.use(passport.session());
 // app.use(
 //   session({
 //     secret: 'you secret key',
@@ -77,9 +103,7 @@ app.get('/one',  (req, res) => {
   })
    res.send('Hello World!');
 })
-app.use(session({ secret: 'cats', resave: false, saveUninitialized: true }));
-app.use(passport.initialize());
-app.use(passport.session());
+
 app.get('/some',  (req, res) => {
   console.log('from someroute:',req.session)
   console.log('from someroute:', req.session.id)
@@ -137,17 +161,22 @@ app.get('/failure', (req, res)=>{
 
 
 app.get('/protected',  (req, res) => {
+  return res.redirect('http://localhost:3000/confirmation'),////тут была переадресация на middle
+  
+
+  res.json({messege: 'авторизация прошла'});
+});
+app.get('/middle',  (req, res) => {
+  console.log('ГДЕб', req.user)
   if(!req.user){
 
    return res.sendStatus(401);
   }
-  // const user = req.user
-  // const candidate = await User.findOne({where: {email}})
-  
-  console.log('вы авторизировались через гугл', req.user.email)
-  res.redirect('http://localhost:3000')
 
+  console.log('вы авторизировались через гугл', req.user.email)
+  return res.redirect('http://localhost:3000'),
   res.json({messege: 'авторизация прошла', data: req.user});
+ 
 });
 
 app.use('/lapi', router);
@@ -158,6 +187,7 @@ app.listen(port, async() => {
   try{
     await sequelize.authenticate()
     await sequelize.sync({alter: true})//{force: true}/{alter: true}
+    
   }catch(e){
     console.log(e)
   }

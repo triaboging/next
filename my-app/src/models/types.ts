@@ -1,11 +1,14 @@
 export interface IUser {
-    email: string;
+    email: string ;
     isActivated: boolean;
-    id: string;
+    id: string ;
+    login: string ;
+    role: string;
 }
 
 export interface AuthResponse {
     accessToken: string;
-    refreshToken: string;
-    user: IUser;
+    //refreshToken: string;
+    userData: IUser;
+    //message: string;
 }
